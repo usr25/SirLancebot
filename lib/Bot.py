@@ -10,7 +10,7 @@ __license__ = "GPLv3"
 CONF_FILENAME = "conf.json"
 
 
-class Bot(object):
+class Bot:
     def __init__(self, data):
         self.data = data
         self.conf = data["conf"]

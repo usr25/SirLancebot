@@ -1,10 +1,13 @@
-import random
+from .Trivia import Trivia
+
 import lichess.api
 
 
-class ChessUncensored(object):
+class ChessUncensored(Trivia):
+    name = "##chess-uncensored"
+
     def __init__(self, data, bot):
-        self.name = "##chess-uncensored"
+        super().__init__()
         self.data = data
         self.bot = bot
 
@@ -36,4 +39,10 @@ class ChessUncensored(object):
 
     def lichess_username(self, nick):
         lichess_usernames = self.data[self.name]["lichess_usernames"]
-        return lichess_usernames[nick] if nick in lichess_usernames else nick
+
+        if nick in lichess_usernames:
+            return lichess_usernames[nick]
+        else:
+            return nick
+
+
