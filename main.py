@@ -51,34 +51,33 @@ def listen():
     if not info:
         return
 
-    nick, chan, cmd, arg = info
-    chan_name = chan.replace("#", "").replace("-", "").title()
+    nick, chan, cmd, args = info
+    chan_name = chan.replace("#", "").title().replace("-", "")
 
     if find(["commands", cmd]):
-        response = bot.form_msg(find(["commands", cmd]), arg)
+        response = bot.form_msg(find(["commands", cmd]))
     elif find([chan, "commands", cmd]):
-        response = bot.form_msg(find([chan, "commands", cmd]), arg)
+        response = bot.form_msg(find([chan, "commands", cmd]))
     elif find([chan, "actions", cmd]) and hasattr(CustomChannels, chan_name):
         void = str(bot.data[chan]["actions"][cmd])
         obj = getattr(CustomChannels, chan_name)(bot.data, bot)
-        response = exec_command(obj, void, arg)
+        response = exec_command(obj, void, args)
     else:
         response = "The command you are trying to execute does not exist."
 
     bot.message(response, chan)
 
 
-def exec_command(obj, func_name, arg):
+def exec_command(obj, func_name, args):
+    response = "That's not a valid command format."
+
     if hasattr(obj, func_name):
         func = getattr(obj, func_name)
 
         try:
-            response = func(arg) if arg else func()
-        except:
-            pass
-
-    else:
-        response = "That's not a valid command format."
+            response = func(*args)
+        except TypeError:
+            response = "The number of arguments is incorrect."
 
     return response
 

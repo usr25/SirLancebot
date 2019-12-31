@@ -82,7 +82,7 @@ class Bot(object):
 
     def listen(self):
         valid = re.compile(
-            r"^:(?P<nick>\w+)(!?\S*) (?P<mode>\w+)\s?((?P<chan>\S+)(\s:!(?P<cmd>\w+)(\s(?P<arg>\w+))?))?")
+            r"^:(?P<nick>\w+)(!?\S*) (?P<mode>\w+)\s?((?P<chan>\S+)(\s:!(?P<cmd>\w+)(\s(?P<args>[\w|\s]+))?))?")
 
         recvd = self.s.recv(4096).decode()
 
@@ -98,7 +98,10 @@ class Bot(object):
         nick = data.group("nick")
         chan = data.group("chan")
         cmd = data.group("cmd")
-        arg = data.group("arg")
+        args = data.group("args")
+
+        if args:
+            args = args.split()
 
         # Allow the bot to have private conversations
         if chan == self.conf["nick"]:
@@ -107,12 +110,12 @@ class Bot(object):
         if isinstance(cmd, str):
             msg = "<%s:%s> %s" % (nick, chan, cmd)
 
-            if arg:
+            for arg in args:
                 msg += " " + arg
 
             print(msg)
 
-            return nick, chan, cmd, arg
+            return nick, chan, cmd, args
 
     def send(self, msg):
         self.s.send(msg.encode("UTF-8"))
@@ -124,5 +127,5 @@ class Bot(object):
         self.send("NOTICE %s :%s\r\n" % (user, msg))
 
     @staticmethod
-    def form_msg(msg, nick=None):
-        return "%s: %s" % (nick, msg) if nick else msg
+    def form_msg(msg):
+        return "%s: %s" % (nick, msg)
