@@ -9,15 +9,17 @@ class ChessUncensored(object):
         self.bot = bot
 
     def rating(self, nick, mode=None):
+        linick = self.lichess_username(nick)
+
         try:
-            user = lichess.api.user(nick)
+            user = lichess.api.user(linick)
         except lichess.api.ApiHttpError:
             return "User not found."
 
-        r = str()
+        r = "<%s> " % linick
 
         if mode:
-            r = user["perfs"][mode]["rating"]
+            r += "%s: %d" % (mode, user["perfs"][mode]["rating"])
         else:
             data = user["perfs"]
 
@@ -28,3 +30,10 @@ class ChessUncensored(object):
             r = r[:-2]
 
         return r
+
+    def tv(self, nick):
+        return "https://lichess.org/@/%s/tv" % self.lichess_username(nick)
+
+    def lichess_username(self, nick):
+        lichess_usernames = self.data[self.name]["lichess_usernames"]
+        return lichess_usernames[nick] if nick in lichess_usernames else nick
