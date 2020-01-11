@@ -2,8 +2,10 @@ from lib.plugins.Plugin import Plugin
 from enum import IntEnum
 
 import numpy as np
+import urllib.request
 import random
 import json
+import html
 
 
 class Phase(IntEnum):
@@ -16,14 +18,21 @@ class Trivia(Plugin):
     def __init__(self, _):
         super().__init__("Trivia", ["create", "join", "start", "answer", "leaderboard", "end"])
 
+        self.__init()
+
+    def __init(self):
         self.phase = Phase.START
 
         self.players = {}
         self.playing = 0
         self.pool = []
 
-        self.questions = json.load(open("lib/plugins/Jeopardy/medium.json", "r"))
+        self.questions = []
         self.question = {}
+
+    def __get_questions(self):
+        url = urllib.request.urlopen("https://opentdb.com/api.php?amount=50")
+        self.questions = json.loads(url.read().decode())["results"]
 
     def create(self, data):
         if self.phase == Phase.START:
@@ -75,39 +84,58 @@ class Trivia(Plugin):
         nick = self.pool[self.playing]
         self.playing = (self.playing + 1) % len(self.pool)
 
+        if not self.questions:
+            self.__get_questions()
+
         self.question = random.choice(self.questions)
         self.questions.remove(self.question)
         self.question["nick"] = nick
 
-        return "%s: %s (%s): %s" % (
+        msg = "%s: %s (%s): %s\n" % (
             self.question["nick"], 
             self.question["category"], 
-            self.question["value"], 
-            self.question["question"]
+            self.question["difficulty"], 
+            html.unescape(self.question["question"])
         )
+
+        answers = self.question["incorrect_answers"]
+        answers.append(self.question["correct_answer"])
+        random.shuffle(answers)
+
+        self.question["answers"] = answers
+
+        msg += "\n".join(["%d. %s" % (i+1, html.unescape(answers[i])) for i in range(len(answers))])
+
+        return msg
 
     def answer(self, data):
         if self.phase < Phase.PLAY:
             return "You first need to start the game. Do !start."
 
-        users_ans = " ".join(data["args"])
+        if self.question["nick"] != data["nick"]:
+            return "The question wasn't addressed at you."
 
-        if self.question["nick"] == data["nick"]:
-            real_ans = self.question["answer"].lower()
+        # Input errors
+        try:
+            ans = int(data["args"][0])
+        except IndexError:
+            return "You didn't provide an argument."
+        except ValueError:
+            return "Your answer is not a number."
 
-            if valid_answer(real_ans, users_ans):
-                self.players[nick] += int(self.question["value"][1:])
+        if ans <= 0 or ans > len(self.question["answers"]):
+            return "Not a valid answer."
 
-                msg = "Correct!"
+        # Answer check
+        if self.question["answers"][ans-1] == self.question["correct_answer"]:
+            self.players[data["nick"]] += 1
 
-                if real_ans != users_ans:
-                    msg += " The precise answer was: " + self.question["answer"]
-            else:
-                msg = "Boooh. The correct answer was: " + self.question["answer"]
-
-            msg += "\n" + self.__ask()
+            msg = "Correct!"
         else:
-            msg = "The question wasn't addressed at you."
+            msg = "Boooh. The correct answer was: " + self.question["correct_answer"]
+
+        # Ask a new question
+        msg += "\n" + self.__ask()
 
         return msg
 
@@ -125,48 +153,6 @@ class Trivia(Plugin):
         msg = self.leaderboard(_) + "\n"
         msg += "Alright, that'll be all."
 
-        self.players = {}
-        self.phase = Phase.START
-
-        self.pool = []
-        self.playing = 0
+        self.__init()
 
         return msg
-
-
-def valid_answer(real_answer, given_answer):
-    bound = 0 if len(real_answer) <= 3 else 1
-
-    return given_answer in real_answer or real_answer in given_answer or \
-           distance_in_bounds(real_answer, given_answer, bound)
-
-
-def distance_in_bounds(s1, s2, bound):
-    d = {}
-
-    len_s1 = len(s1)
-    len_s2 = len(s2)
-
-    if abs(len_s1 - len_s2) > bound:
-        return False
-
-    for i in range(-1, len_s1 + 1):
-        d[(i, -1)] = i+1
-
-    for j in range(-1, len_s2 + 1):
-        d[(-1, j)] = j+1
-
-    for i in range(len_s1):
-        for j in range(len_s2):
-            cost = 0 if s1[i] == s2[j] else 1
-
-            d[(i, j)] = min(
-                d[(i-1, j-1)] + cost,  # Substitution
-                d[(i-1, j)] + 1,  # Deletion
-                d[(i, j-1)] + 1,  # Insertion
-            )
-
-            if i and j and s1[i] == s2[j-1] and s1[i-1] == s2[j]:
-                d[(i, j)] = min(d[(i, j)], d[i-2, j-2] + cost)  # Transposition
-
-    return d[len_s1 - 1, len_s2 - 1] <= bound
