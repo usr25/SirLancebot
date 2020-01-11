@@ -1,49 +1,19 @@
 # SirLancebot
 
 A simple python bot. It's intended to be easy for plugins.
-The bot consists mostly of main.py and lib/Bot.py.
-To add code for a new channel just add an object to lib/CustomChannels.py following the example.
+The bot consists mainly of main.py and lib/Bot.py.
+To add code for a new plugin just add your code to the plugins folder.
 
 ## Code
 
 The code is structured in three main files.
 1. **Bot.py**: Handles sockets and connections.
 2. **main.py**: Interacts with Bot.py and links all plugins together.
-3. **CustomChannels.py**: Deals with plugins.
+3. **Plugin.py**: States the main structure every plugin should follow.
 
 ### Plugins
-A plugin specifies the actions the bot should be able to perform in the channel it's named after.
-
-```
-class ChannelName(object):
-    def __init__(self, data, bot):
-        self.name = "#channel_name"
-        self.data = data
-        self.bot = bot
-        
-    def shout(self, arg=None):
-        """ An example of an action, it should return a response. The arg is optional. """
-        if arg:
-            return "HELLO %s!" % arg.upper()
-        
-        return "HELLO!"
-```
-
-Actions should only be used for answers that need some kind of computation. If it is 
-a static response it should be added to the conf.json following the structure below:
-
-```
-{
-    "#channel_name": {
-        "commands": {
-            "hello": "Hello"  # Answers `Hello` when someone executes `?hello`.
-        },
-        "actions": {
-            "shout": "shout"  # Points the command `?shout` to the function `shout`.
-        }
-    }
-}
-```
+A plugin specifies a series of actions to be performed in any of the channels the bot is in.
+Initalize your plugin with its name and the list of commands it handles. The plugin's commands should have a function named after them that takes in a dictionary data and returns a message.
 
 ## Config file
 

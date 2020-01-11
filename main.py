@@ -1,26 +1,25 @@
-import json, inspect
 from threading import Thread
 
-from lib import CustomChannels
+import importlib
+import inspect
+import json
+
 from lib.Bot import Bot
+from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
+plugins = ["Trivia", "Lichess"]
 
 def main():
-    global bot, channels
+    global bot
+
     data = load_config()
     bot = Bot(data)
 
-    # obj = getattr(CustomChannels, chan_name)(bot.data, bot)
-
-    channels = {}
-
-    for _, obj in inspect.getmembers(CustomChannels, inspect.isclass):
-        try:
-            channels[obj.name] = obj(bot.data, bot)
-        except (AttributeError, TypeError):
-            pass
+    for i in range(len(plugins)):
+        mod = importlib.import_module("lib.plugins." + plugins[i])
+        plugins[i] = getattr(mod, plugins[i])(data)
 
     # Input written in the prompt would be sent as bot's messages
     Thread(target=chat).start()
@@ -56,41 +55,31 @@ def find(path):
 
 
 def listen():
-    info = bot.listen()
+    data = bot.listen()
 
-    if not info:
+    if not data:
         return
 
-    nick, chan, cmd, args = info
-    chan_name = chan.replace("#", "").title().replace("-", "")
+    msg = "The command you are trying to execute does not exist."
 
-    if find(["commands", cmd]):
-        response = bot.form_msg(find(["commands", cmd]))
-    elif find([chan, "commands", cmd]):
-        response = bot.form_msg(find([chan, "commands", cmd]))
-    elif find([chan, "actions", cmd]) and hasattr(CustomChannels, chan_name):
-        void = bot.data[chan]["actions"][cmd]
-        response = exec_command(channels[chan], void, args, nick)
-    else:
-        response = "The command you are trying to execute does not exist."
+    for plugin in plugins:
+        if data["cmd"] in plugin.cmds:
+            msg = exec_cmd(plugin, data)
 
-    bot.message(response, chan)
+    bot.message(data["chan"], msg)
 
 
-def exec_command(obj, func_name, args, nick):
-    response = "That's not a valid command format."
+def exec_cmd(plugin, data):
+    msg = "That's not a valid command format."
 
-    if hasattr(obj, func_name["function"]):
-        func = getattr(obj, func_name["function"])
+    func = getattr(plugin, data["cmd"])
 
-        if func_name["arguments"][0] <= len(args) <= func_name["arguments"][1]:
-            response = func(*args)
-        elif func_name["arguments"][0] == 1:
-            response = func(nick)
-        else:
-            response = "The number of arguments is incorrect."
+    try:
+        msg = func(data)
+    except ValueError:
+        msg = "The number of arguments is incorrect."
 
-    return response
+    return msg
 
 
 if __name__ == "__main__":

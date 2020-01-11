@@ -90,42 +90,35 @@ class Bot:
             self.pong(recvd)
             return
 
-        data = valid.match(recvd)
+        msg = valid.match(recvd)
 
-        if not data:
+        if not msg:
             return
 
-        nick = data.group("nick")
-        chan = data.group("chan")
-        cmd = data.group("cmd")
-        args = data.group("args")
+        data = {
+            "nick": msg.group("nick"),
+            "chan": msg.group("chan"),
+            "cmd": msg.group("cmd"),
+            "args": msg.group("args")
+        }
 
-        if args:
-            args = args.split()
+        if isinstance(data["cmd"], str):
+            msg = "<%s:%s> %s" % (data["nick"], data["chan"], data["cmd"])
 
-        # Allow the bot to have private conversations
-        if chan == self.conf["nick"]:
-            chan = nick
-
-        if isinstance(cmd, str):
-            msg = "<%s:%s> %s" % (nick, chan, cmd)
-
-            for arg in args:
-                msg += " " + arg
+            if data["args"]:
+                msg += " " + data["args"].replace("\n", "")
+                data["args"] = data["args"].split()
 
             print(msg)
 
-            return nick, chan, cmd, args
+            return data
 
     def send(self, msg):
         self.s.send(msg.encode("UTF-8"))
 
-    def message(self, msg, chan):
-        self.send("PRIVMSG %s :%s\r\n" % (chan, msg))
+    def message(self, chan, msg):
+        for phrase in msg.splitlines():
+            self.send("PRIVMSG %s :%s\r\n" % (chan, phrase))
 
     def notice(self, user, msg):
         self.send("NOTICE %s :%s\r\n" % (user, msg))
-
-    @staticmethod
-    def form_msg(msg):
-        return "%s: %s" % (nick, msg)
