@@ -27,12 +27,37 @@ class Trivia(Plugin):
         self.playing = 0
         self.pool = []
 
-        self.questions = []
+        self.questions = {}
         self.question = {}
-
+    
     def __get_questions(self):
+        """ Gets 50 random questions from opentdb and orders them by category. """
+
         url = urllib.request.urlopen("https://opentdb.com/api.php?amount=50")
-        self.questions = json.loads(url.read().decode())["results"]
+        questions = json.loads(url.read().decode())["results"]
+
+        for question in questions:
+            category = question["category"].split(":")[0]
+
+            if category in self.questions:
+                self.questions[category].append(question)
+            else:
+                self.questions[category] = [question]
+        
+    def __get_question(self):
+        """ Gets a random question from a random category. 
+            This is done to avoid repeating categories many times. """
+        
+        while len(self.questions.keys()) < 5:
+            self.__get_questions()
+
+        category = random.choice(list(self.questions.keys()))
+
+        self.question = random.choice(self.questions[category])
+        self.questions[category].remove(self.question)
+
+        if not self.questions[category]:
+            self.questions.pop(category)
 
     def create(self, data):
         if self.phase == Phase.START:
@@ -84,14 +109,12 @@ class Trivia(Plugin):
         nick = self.pool[self.playing]
         self.playing = (self.playing + 1) % len(self.pool)
 
-        if not self.questions:
-            self.__get_questions()
+        self.__get_question()
 
-        self.question = random.choice(self.questions)
-        self.questions.remove(self.question)
+        # Adds the nick to the question to know who has to answer.
         self.question["nick"] = nick
 
-        msg = "%s: %s (%s): %s\n" % (
+        msg = "%s: %s (%s): %s" % (
             self.question["nick"], 
             self.question["category"], 
             self.question["difficulty"], 
@@ -104,7 +127,8 @@ class Trivia(Plugin):
 
         self.question["answers"] = answers
 
-        msg += "\n".join(["%d. %s" % (i+1, html.unescape(answers[i])) for i in range(len(answers))])
+        for i in range(len(answers)):
+            msg += "\n%d. %s" % (i+1, html.unescape(answers[i]))
 
         return msg
 
@@ -132,7 +156,7 @@ class Trivia(Plugin):
 
             msg = "Correct!"
         else:
-            msg = "Boooh. The correct answer was: " + self.question["correct_answer"]
+            msg = "Boooh. The correct answer was: " + html.unescape(self.question["correct_answer"])
 
         # Ask a new question
         msg += "\n" + self.__ask()
