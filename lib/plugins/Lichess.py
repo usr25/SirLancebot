@@ -23,8 +23,12 @@ class Lichess(Plugin):
         if mode:
             r += "%s: %d" % (mode, user["perfs"][mode]["rating"])
         else:
-            data = user["perfs"]
-            r += ", ".join(["%s: %d" % (k, data[k]["rating"]) for k in data.keys()])
+            info = user["perfs"]
+
+            for tc, rating in sorted(info.items(), key=lambda item: item[1]["rating"], reverse=True):
+                r += "%s: %d, " % (tc, rating["rating"])
+
+            r = r[:-2]
 
         return r
 
