@@ -16,7 +16,7 @@ class Phase(IntEnum):
 
 class Trivia(Plugin):
     def __init__(self, _):
-        super().__init__("Trivia", ["create", "join", "start", "answer", "leaderboard", "end"])
+        super().__init__("Trivia", ["create", "join", "start", "answer", "leaderboard", "leave", "end"])
 
         self.__init()
 
@@ -72,7 +72,7 @@ class Trivia(Plugin):
         if self.phase >= Phase.JOIN:
             nick = data["nick"]
 
-            if nick not in self.players.keys():
+            if nick not in self.pool:
                 self.players[nick] = 0
                 self.pool.append(nick)
                 msg = nick + " joined."
@@ -172,6 +172,28 @@ class Trivia(Plugin):
             order += 1
 
         return msg
+
+    def leave(self, data):
+        if self.phase < Phase.PLAY:
+            return "You first need to start the game. Do !start."
+
+        if data["nick"] not in self.pool:
+            return "You are not playing."
+
+        self.pool.remove(data["nick"])
+
+        if not self.pool:
+            return self.end(data)
+
+        self.playing %= len(self.pool)
+
+        msg = "%s left." % data["nick"]
+
+        if self.question["nick"] == data["nick"]:
+            msg += '\n' + self.__ask()
+
+        return msg
+        
 
     def end(self, _):
         msg = self.leaderboard(_) + "\n"
