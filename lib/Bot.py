@@ -117,6 +117,7 @@ class Bot:
         self.s.send(msg.encode("UTF-8"))
 
     def message(self, chan, msg):
+        time.sleep(0.5)
         for phrase in msg.splitlines():
             self.send("PRIVMSG %s :%s\r\n" % (chan, phrase))
 
