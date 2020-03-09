@@ -21,7 +21,10 @@ class Lichess(Plugin):
         r = "<%s> " % linick
 
         if mode:
-            r += "%s: %d" % (mode, user["perfs"][mode]["rating"])
+            if mode in user["perfs"]:
+                r += "%s: %d" % (mode, user["perfs"][mode]["rating"])
+            else:
+                return "Incorrect mode."
         else:
             info = user["perfs"]
 
