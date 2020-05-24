@@ -130,7 +130,7 @@ class Trivia(Plugin):
         msg += "\n"
 
         for i in range(len(answers)):
-            msg += "%d. %s" % (i+1, html.unescape(answers[i]))
+            msg += "%d. %s " % (i+1, html.unescape(answers[i]))
 
         return msg
 
