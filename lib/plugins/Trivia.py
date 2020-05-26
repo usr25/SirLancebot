@@ -73,7 +73,7 @@ class Trivia(Plugin):
             nick = data["nick"]
 
             if nick not in self.pool:
-                self.players[nick] = 0
+                self.players[nick] = {"questions": 0, "correct": 0}
                 self.pool.append(nick)
                 msg = nick + " joined."
             else:
@@ -152,9 +152,11 @@ class Trivia(Plugin):
         if ans <= 0 or ans > len(self.question["answers"]):
             return "Not a valid answer."
 
+        self.players[data["nick"]]["questions"] += 1
+
         # Answer check
         if self.question["answers"][ans-1] == self.question["correct_answer"]:
-            self.players[data["nick"]] += 1
+            self.players[data["nick"]]["correct"] += 1
 
             msg = "Correct!"
         else:
@@ -170,7 +172,7 @@ class Trivia(Plugin):
         order = 1
 
         for player, score in sorted(self.players.items(), key=lambda item: item[1], reverse=True):
-            msg += "\n%d. %s: %d $" % (order, player, score)
+            msg += "\n%d. %s: %d  %.2f" % (order, player, score["correct"], score["correct"] / score["questions"])
             order += 1
 
         return msg
