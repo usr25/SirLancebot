@@ -171,7 +171,7 @@ class Trivia(Plugin):
         msg = "Leaderboard:"
         order = 1
 
-        for player, score in sorted(self.players.items(), key=lambda item: item[1], reverse=True):
+        for player, score in sorted(self.players.items(), key=lambda item: item[1]["correct"], reverse=True):
             msg += "\n%d. %s: %d  %.2f" % (order, player, score["correct"], score["correct"] / score["questions"])
             order += 1
 
