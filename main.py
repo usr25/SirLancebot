@@ -1,7 +1,6 @@
 from threading import Thread
 
 import importlib
-import inspect
 import json
 
 from lib.Bot import Bot
@@ -9,7 +8,8 @@ from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
-plugins = ["Trivia", "Lichess"]
+plugins = ["Trivia", "Lichess", "Timezone"]
+
 
 def main():
     global bot
@@ -74,10 +74,10 @@ def exec_cmd(plugin, data):
 
     func = getattr(plugin, data["cmd"])
 
-    try:
-        msg = func(data)
-    except ValueError:
-        msg = "The number of arguments is incorrect."
+    #try:
+    msg = func(data)
+    #except ValueError:
+    #    msg = "The number of arguments is incorrect."
 
     return msg
 
