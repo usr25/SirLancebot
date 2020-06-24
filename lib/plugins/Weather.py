@@ -1,6 +1,6 @@
 from lib.plugins.Plugin import Plugin
 
-import requests, json
+import requests, json, itertools
 
 
 """ This class uses the open weather API to provide a simple msg with
@@ -31,10 +31,13 @@ class Weather(Plugin):
             return "Ensure that the key has a valid format"
 
         base_url = "http://api.openweathermap.org/data/2.5/weather?"
-        city_name = data[0]
+        city_name_iter = itertools.takewhile(lambda s : not s.startswith('-'), data["args"])
+        city_name = " ".join(city_name_iter)
+
         complete_url = f"{base_url}appid={self.key}&q={city_name}" 
 
         response = requests.get(complete_url)
+        #print res to see the possible options
         res = response.json()
 
         return _parse_response(res)
@@ -47,13 +50,14 @@ def _to_celsius(temp):
 def _parse_response(res):
     if res["cod"] == 200:
 
-        temp = to_celsius(res["main"]["temp"])
+        temp = _to_celsius(res["main"]["temp"])
+        feels_like = _to_celsius(res["main"]["feels_like"])
         hum = res["main"]["humidity"]
         weather_main = res["weather"][0]["main"]
         weather_desc = res["weather"][0]["description"]
 
-        return f"{temp}ºC {hum}% {weather_main} ({weather_desc})"
+        return f"{temp}ºC feels:{feels_like}ºC {hum}% {weather_main} ({weather_desc})"
     else:
         if res["cod"] == 401:
-            return "Key is invalid"
-        return "No weather for that city or the key is invalid"
+            return "Key is not accepted by openweathermap.com"
+        return "No weather for that city"

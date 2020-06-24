@@ -22,15 +22,15 @@ an entry as shown below.
 
 ```
 {
-    'conf' = {
-        "irc": str(),       # IRC's address
-        "port": int(),      # IRC's port
-        "nick": str(),      # Bot's nick
-        "user": str(),      # Bot's username
-        "real": str(),      # Bot's realname
-        "pass": str()       # Bot's password
-        "chans": [str()],   # Channels to connect to
-        "weather_key": str()# Key for the weather api openweathermap
+    "conf" : {
+        "irc": "irc.freenode.net", # IRC address
+        "port": 7000, # IRC port
+        "nick": "", # BOT's nick
+        "user": "", # BOT's username
+        "real": "", # BOT's realname
+        "pass": "", # BOT's password
+        "chans": [""], # List of channels
+        "weather_key": "" # Open weather api's key
     }
 }
 ```
