@@ -30,7 +30,7 @@ an entry as shown below.
         "real": str(),      # Bot's realname
         "pass": str()       # Bot's password
         "chans": [str()],   # Channels to connect to
-        "weather_key": str()#Key for the weather api openweathermap
+        "weather_key": str()# Key for the weather api openweathermap
     }
 }
 ```
