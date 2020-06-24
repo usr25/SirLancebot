@@ -8,7 +8,7 @@ from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
-plugins = ["Trivia", "Lichess", "Timezone"]
+plugins = ["Trivia", "Lichess", "Timezone", "Weather"]
 
 
 def main():
