@@ -58,7 +58,7 @@ def _parse_response(res):
         weather_main = res["weather"][0]["main"]
         weather_desc = res["weather"][0]["description"]
 
-        return f"{temp}ºC feels:{feels_like}ºC {hum}% {weather_main} ({weather_desc})"
+        return "%sºC feels:%sºC %s%% %s (%s)" % (temp, feels_like, hum, weather_main, weather_desc)
     else:
         if res["cod"] == 401:
             return "Key is not accepted by openweathermap.com"
