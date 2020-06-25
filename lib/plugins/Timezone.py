@@ -17,6 +17,6 @@ class Timezone(Plugin):
         for timezone in self.timezones:
             if country in timezone:
                 time = datetime.now(pytz.timezone(timezone))
-                return time.strftime('%H:%M:%S')
+                return country + ": " + time.strftime('%H:%M:%S')
 
         return "No timezone for that city"
