@@ -2,6 +2,7 @@ from lib.plugins.Plugin import Plugin
 
 import lichess.api
 
+
 class Lichess(Plugin):
     def __init__(self, data):
         super().__init__("Lichess", ["rating", "tv"])

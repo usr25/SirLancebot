@@ -12,11 +12,12 @@ class Timezone(Plugin):
         self.timezones = pytz.all_timezones
 
     def time(self, data):
-        country = data["args"][0].title()
+        city_name_iter = itertools.takewhile(lambda s: not s.startswith('-'), data["args"])
+        city_name = " ".join(city_name_iter)
 
         for timezone in self.timezones:
-            if country in timezone:
+            if city_name in timezone:
                 time = datetime.now(pytz.timezone(timezone))
-                return country + ": " + time.strftime('%H:%M:%S')
+                return city_name + ": " + time.strftime('%H:%M:%S')
 
         return "No timezone for that city"
