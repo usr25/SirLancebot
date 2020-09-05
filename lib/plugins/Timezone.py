@@ -14,10 +14,11 @@ class Timezone(Plugin):
 
     def time(self, data):
         city_name = " ".join(arg.title() for arg in data["args"])
+        city_code = city_name.replace(" ", "_")
 
         for timezone in self.timezones:
-            if city_name in timezone:
+            if city_code in timezone:
                 time = datetime.now(pytz.timezone(timezone))
                 return city_name + ": " + time.strftime('%H:%M:%S')
 
-        return "No timezone for that city"
+        return "No timezone for " + city_name
