@@ -13,8 +13,7 @@ class Timezone(Plugin):
         self.timezones = pytz.all_timezones
 
     def time(self, data):
-        city_name_iter = itertools.takewhile(lambda s: not s.startswith('-'), data["args"])
-        city_name = " ".join(city_name_iter)
+        city_name = " ".join(arg.title() for arg in data["args"])
 
         for timezone in self.timezones:
             if city_name in timezone:
