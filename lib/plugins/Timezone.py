@@ -2,6 +2,7 @@ from lib.plugins.Plugin import Plugin
 
 from datetime import datetime
 import pytz
+import itertools
 
 
 class Timezone(Plugin):
