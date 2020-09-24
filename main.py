@@ -8,7 +8,7 @@ from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
-plugin_names = ["Trivia", "Timezone", "Weather"]
+plugin_names = ["Trivia", "Lichess", "Timezone", "Weather"]
 plugins = []
 name_to_plugin = {}
 
@@ -92,7 +92,7 @@ def _help(data):
 
     not_recognized = []
 
-    if data["args"] == []:
+    if data["args"] == None or data["args"] == []:
         msg = "The supported plugins are: "
 
         for plugin in plugin_names:
