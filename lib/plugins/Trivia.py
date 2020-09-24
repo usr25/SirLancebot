@@ -16,7 +16,9 @@ class Phase(IntEnum):
 
 class Trivia(Plugin):
     def __init__(self, _):
-        super().__init__("Trivia", ["create", "join", "start", "answer", "leaderboard", "leave", "end"])
+        super().__init__("Trivia",
+                         "Play a trivia game. cmds: !create; !join; !start; !answer <number>; !leaderboard; !leave; !end",
+                         ["create", "join", "start", "answer", "leaderboard", "leave", "end"])
 
         self.__init()
 

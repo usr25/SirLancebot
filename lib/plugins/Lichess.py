@@ -4,7 +4,9 @@ import lichess.api
 
 class Lichess(Plugin):
     def __init__(self, data):
-        super().__init__("Lichess", ["rating", "tv"])
+        super().__init__("Lichess",
+                         "Interact with Lichess. cmds: !rating <name> [category]; !tv <name>",
+                         ["rating", "tv"])
         self.data = data
 
     def rating(self, data):

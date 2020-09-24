@@ -8,8 +8,9 @@ from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
-plugins = ["Trivial", "Lichess", "Timezone", "Weather"]
-
+plugin_names = ["Trivia", "Lichess", "Timezone", "Weather"]
+plugins = []
+name_to_plugin = {}
 
 def main():
     global bot
@@ -17,9 +18,10 @@ def main():
     data = load_config()
     bot = Bot(data)
 
-    for i in range(len(plugins)):
-        mod = importlib.import_module("lib.plugins." + plugins[i])
-        plugins[i] = getattr(mod, plugins[i])(data)
+    for p_name in plugin_names:
+        mod = importlib.import_module("lib.plugins." + p_name)
+        plugins.append(getattr(mod, p_name)(data))
+        name_to_plugin[p_name.lower()] = plugins[-1]
 
     # Input written in the prompt would be sent as bot's messages
     Thread(target=chat).start()
@@ -62,9 +64,12 @@ def listen():
 
     msg = "The command you are trying to execute does not exist."
 
-    for plugin in plugins:
-        if data["cmd"] in plugin.cmds:
-            msg = exec_cmd(plugin, data)
+    if data["cmd"] == "h" or data["cmd"] == "help":
+        msg = _help(data)
+    else:
+        for plugin in plugins:
+            if data["cmd"] in plugin.cmds:
+                msg = exec_cmd(plugin, data)
 
     bot.message(data["chan"], msg)
 
@@ -81,6 +86,30 @@ def exec_cmd(plugin, data):
 
     return msg
 
+
+def _help(data):
+    msg = ""
+
+    not_recognized = []
+
+    if data["args"] == []:
+        msg = "The supported plugins are: "
+
+        for plugin in plugin_names:
+            msg += plugin + ' '
+
+        msg += "-> !h <plugin>"
+    else:
+        for name in data["args"]:
+            lc_name = name.lower()
+            try:
+                msg += name_to_plugin[lc_name].helpmsg + '\n'
+            except KeyError:
+                not_recognized.append(lc_name)
+
+    msg += '(' + ",".join(not_recognized) + ") aren't recognized"
+
+    return msg
 
 if __name__ == "__main__":
     main()

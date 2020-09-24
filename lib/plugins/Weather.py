@@ -9,7 +9,9 @@ import requests, json, itertools
 """
 class Weather(Plugin):
     def __init__(self, data):
-        super().__init__("Weather", ["weather"])
+        super().__init__("Weather",
+                         "Weather on a city. cmd: !weather <city>" ,
+                         ["weather"])
         self.data = data
         #TODO: Properly assign the key
         self.key = ""
@@ -28,7 +30,7 @@ class Weather(Plugin):
         """
 
         if not self.key_is_valid():
-            return "Ensure that the key has a valid format"
+            return "(DEVELOPER) Ensure that the API key has a valid format"
 
         base_url = "http://api.openweathermap.org/data/2.5/weather?"
         city_name_iter = itertools.takewhile(lambda s : not s.startswith('-'), data["args"])
