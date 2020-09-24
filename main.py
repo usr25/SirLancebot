@@ -8,7 +8,7 @@ from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
-plugin_names = ["Trivia", "Lichess", "Timezone", "Weather"]
+plugin_names = ["Trivia", "Timezone", "Weather"]
 plugins = []
 name_to_plugin = {}
 
@@ -107,7 +107,8 @@ def _help(data):
             except KeyError:
                 not_recognized.append(lc_name)
 
-    msg += '(' + ",".join(not_recognized) + ") aren't recognized"
+        if not_recognized != []:
+            msg += '(' + ",".join(not_recognized) + ") aren't recognized"
 
     return msg
 
