@@ -8,7 +8,7 @@ from lib import plugins
 
 CONF_FILE_NAME = "conf.json"
 
-plugin_names = ["Trivia", "Lichess", "Timezone", "Weather", "Echo"]
+plugin_names = ["Trivia", "Lichess", "Timezone", "Weather", "Echo", "EightBall"]
 plugins = []
 name_to_plugin = {}
 
