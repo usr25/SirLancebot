@@ -95,10 +95,9 @@ def _help(data):
     if data["args"] == None or data["args"] == []:
         msg = "The supported plugins are: "
 
-        for plugin in plugin_names:
-            msg += plugin + ' '
+        plugins_listed = ", ".join(plugin_names)
+        msg += plugins_listed + " -> !h <plugin>"
 
-        msg += "-> !h <plugin>"
     else:
         for name in data["args"]:
             lc_name = name.lower()
