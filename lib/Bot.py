@@ -82,7 +82,7 @@ class Bot:
 
     def listen(self):
         valid = re.compile(
-            r"^:(?P<nick>\w+)(!?\S*) (?P<mode>\w+)\s?((?P<chan>\S+)(\s:!(?P<cmd>\w+)(\s(?P<args>[\w|\s]+))?))?")
+            r"^:(?P<nick>\w+)(!?\S*) (?P<mode>\w+)\s?((?P<chan>\S+)(\s:!(?P<cmd>\w+)(\s(?P<args>[\w\-|\s]+))?))?")
 
         recvd = self.s.recv(4096).decode()
 
