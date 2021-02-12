@@ -71,7 +71,9 @@ def listen():
             if data["cmd"] in plugin.cmds:
                 msg = exec_cmd(plugin, data)
 
-    bot.message(data["chan"], msg)
+    #Maybe we don't want the bot to send a msg
+    if msg:
+        bot.message(data["chan"], msg)
 
 
 def exec_cmd(plugin, data):
